@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kitty Database</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Kitty Database</h1>
+            <p>This page just adds data to the firebase database. This is a much simpler way of 
+            adding data compared to using Android. </p>
+    </header>
+
+    <main>
+        <button type="button" onclick="addData()" style="display: block">Add Data to Firebase!</button> 
+
+
+        <div style="border-style: solid; border-width: 1px; display: block">
+            <h4>Get Breed Info From Firebase</h1>
+            <form name="breedForm" onsubmit="return getData()">
+                Breed Type: <br>
+                <input type="text" name="breedType">
+                <input type="button" onclick="getData()" value="Get Kitty!">
+            </form>
+        </div> 
+
+        <h2 style="text-align: center; border: 3px solid #734adf">Data from Web Scrape</h2>
+    </main>
+
+
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+    <script type="text/javascript" src="breeds.js"></script> 
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyAl-iQgAYTZUSpn7Ol1unehJ-e0odd4yX8",
+        authDomain: "ai-project-cs480.firebaseapp.com",
+        databaseURL: "https://ai-project-cs480.firebaseio.com",
+        projectId: "ai-project-cs480",
+        storageBucket: "ai-project-cs480.appspot.com",
+        messagingSenderId: "28771792635"
+      };
+      firebase.initializeApp(config);
+    </script>
+    
+    <!-- Add data to database -->
+    <script>
+        // document.write(kitties[0].breed_type);
+        // document.write(kitties[0].info+"<br>");
+
+        // List all breeds
+        for (i = 0; i < kitties.length; i++) {
+            document.write("<h2>"+kitties[i].breedType+"</h2>");
+            document.write("<p>"+kitties[i].info+"</p>");
+            document.write("<br>");
+            document.write("<br>");
+        }
+
+        var database = firebase.database();
+
+        // Add data to firebase
+        // NOTE: CHECK Database rules if results not publishing
+        function addData() {
+            if (confirm("Warning! Data will Be overwriiten.")) {  // Confirm add to database
+                for (i = 0; i < kitties.length; i++) {
+                    database.ref("breeds/"+kitties[i].breedType+"/").set(kitties[i]);
+                }
+                alert("Data Added to Firebase! Check database.")
+            }
+        }
+
+        // Get data from firebase
+        function getData() {
+            var breedName = document.forms["breedForm"]["breedType"].value;
+
+            var rootRef = firebase.database().ref("breeds/"+breedName);
+            rootRef.once("value").then(function(snapshot) {
+                var available = snapshot.exists();
+
+                if (available) { // Breed exists in database
+                    var childKey = snapshot.child("info").val();
+                    alert(breedName.toUpperCase()+":\n\n"+childKey); 
+                } else { // Breed does not exist in database
+                    alert("Breed Not Found!");
+                }
+
+            });
+        }
+    </script>
+
+</body>
+</html>
